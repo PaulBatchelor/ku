@@ -3,8 +3,8 @@
 #include <dlfcn.h>
 #include "lodepng.h"
 
-#define WIDTH 256
-#define HEIGHT 128
+#define WIDTH 1024
+#define HEIGHT 768
 
 static s7_pointer cload(s7_scheme *sc, s7_pointer args);
 
@@ -84,6 +84,14 @@ static void write_png(ku_image *ku, const char *filename)
     if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
 }
 
+static void ku_setsize(ku_image *kup, unsigned int width, unsigned int height)
+{
+    if(width > WIDTH || height > HEIGHT) {
+    }
+    kup->width = width;
+    kup->height = height;
+}
+
 static void ku_init(ku_image *my_ku)
 {
     int x, y; 
@@ -109,6 +117,16 @@ static s7_pointer f_set_color(s7_scheme *sc, s7_pointer args)
     return s7_nil(sc);
 }
 
+static s7_pointer f_set_size(s7_scheme *sc, s7_pointer args)
+{
+    int width  = s7_integer(s7_list_ref(sc, args, 0));
+    int height = s7_integer(s7_list_ref(sc, args, 1));
+    ku_setsize(&ku, width, height);
+    s7_define_variable(sc, "width", s7_make_integer(sc, ku.width));
+    s7_define_variable(sc, "height", s7_make_integer(sc, ku.height));
+    return s7_nil(sc);
+}
+
 static s7_pointer f_write_png(s7_scheme *sc, s7_pointer args)
 {
     const char *str = s7_string(s7_list_ref(sc, args, 0));
@@ -120,6 +138,7 @@ void init_ku(s7_scheme *sc)
 {
     ku_init(&ku);
     s7_define_function(sc, "set-color", f_set_color, 3, 0, false, NULL);
+    s7_define_function(sc, "set-size", f_set_size, 2, 0, false, NULL);
     s7_define_function(sc, "write-png", f_write_png, 1, 0, false, NULL);
     s7_define_variable(sc, "width", s7_make_integer(sc, ku.width));
     s7_define_variable(sc, "height", s7_make_integer(sc, ku.height));

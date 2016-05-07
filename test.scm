@@ -16,6 +16,7 @@
 
 (ps-eval 0 "'x' '0' gen_vals")
 
+(set-size 512 256)
 
 (define writeframe (lambda () 
 (begin 
